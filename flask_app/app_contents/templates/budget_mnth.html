@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block body %}
+ 
+<div class="block1">
+<h1>Spent in {{month_display|safe}} = {{month_spent|safe}}</h1>
+<h1>Spent by Category in {{month_display|safe}}</h1>
+{{html_table2|safe}}
+<h1>Purchases in {{month_display|safe}}</h1>
+{{html_table|safe}}
+</div>
+{% endblock %}

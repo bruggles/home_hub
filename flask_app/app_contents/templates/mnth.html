@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="block1">
+<h1>{{month_display}}</h1>
+<h2>Spent in {{month_display}}: &#36;{{month_spent}}<h2>
+{{mnth_table|safe}}
+{{cat_mnth_table|safe}}
+<h2>Other Months to look at</h2>
+{{mnth_list|safe}}
+</div>
+{% endblock %}

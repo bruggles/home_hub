@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block body %}
+ 
+<div class="block1">
+<h1>Budget Overview</h1>
+{{rem_table|safe}}
+{{bud_table|safe}}
+{{aloc_table|safe}}
+{{month_table|safe}}
+</div>
+{% endblock %}

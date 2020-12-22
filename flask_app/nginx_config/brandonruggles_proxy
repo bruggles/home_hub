@@ -1,0 +1,10 @@
+server {
+    listen 80;
+    server_name brandonruggles.com www.brandonruggles.com;
+
+    #location / { try_files $uri @app; }
+    location / {
+        include uwsgi_params;
+        uwsgi_pass unix:/tmp/brandonruggles.sock;
+    }
+}

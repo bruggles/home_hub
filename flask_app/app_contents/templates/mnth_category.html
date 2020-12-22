@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="block1">
+
+<h1>{{month_display}} {{category}} Report</h1>
+<h2>Spent in {{month_display}}: &#36;{{month_spent}}</h2>
+{{expense_table|safe}}
+</div>
+{% endblock %}

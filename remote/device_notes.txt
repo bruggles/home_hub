@@ -1,0 +1,31 @@
+packages to install on connected devices
+sudo apt-get update
+sudo apt-get install python3-pip
+sudo pip3 install python-dotenv RPi.GPIO pyyaml twilio
+
+create a device vars.env file in the home directory of the repo
+include the following rows in it:
+export TWILIO_SID="id_given_by_twilio"
+export TWILIO_TOKEN="token_given_by_twilio"
+export TWILIO_PHONE="twilio phone number that starts with +1"
+export MAIN_ADDR="user@ip_addr"
+export GARAGE_NUMS="phone numbers that get garage messages starting with +1"
+export MAIN_ADDR="local ip address of main server"
+export GARAGE_ACTS='comma separated GPIO pins for garage door opening'
+export GARAGE_SENSORS='comma separated GPIO pins for garage door sensing in same order as above'
+export RELAY_SAFETY_NO='connected to safety relay that is wired NO'
+export RELAY_SAFETY_NC='connected to safety relay that is wired NC'
+
+if you want to enable a camera
+use raspi-config to enable the camera
+sudo raspi-config #go to interfacing options and camera...
+install picamera
+sudo pip3 install picamera
+
+auto start garage sensing on startup (assuming Jessie, Stretch, or Buster distro)
+sudo cp /home/pi/repos/home_hub/remote/start_garage_sense.service /etc/systemd/system/start_garage_sense.service
+sudo systemctl start start_garage_sense.service 
+sudo systemctl enable start_garage_sense.service
+
+ssh stuff
+you will need to set up ssh keys in your user and in /root (you can just copy them) they need access to write to the main computer

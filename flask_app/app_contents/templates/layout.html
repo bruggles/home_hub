@@ -1,0 +1,66 @@
+<html>
+<head>
+    <title>Home Hub</title>
+     <link rel="stylesheet" href="{{ url_for('static', filename='layout-styles.css') }}">
+</head>
+
+<body>
+<meta name="viewport" content="user-scalable=0, initial-scale=1.0">
+    <nav>
+
+    <ul>
+        <li><a href="{{ url_for('index') }}">Home<span></span></a>
+        </li>
+
+        <li><a href="{{ url_for('garage_action') }}">Garage <span class="caret"></span></a>
+          <div>
+            <ul>
+              <li><a href="{{ url_for('garage_action', gdoor = 'a') }}">Open/Close Door A</a></li>
+              <li><a href="{{ url_for('garage_action', gdoor = 'b') }}">Open/Close Door B</a></li>
+            </ul>
+          </div>
+        </li>
+
+        <li><a href="{{ url_for('category') }}">Budget <span class="caret"></span></a>
+        <div>
+            <ul>
+              <li><a href="{{ url_for('budget_sum') }}">Budget Summary</a></li>
+              <li><a href="{{ url_for('category') }}">Category Reports</a></li>
+              <li><a href="{{ url_for('mnths') }}">Month Reports</a></li>
+              <li><a href="{{ url_for('actions') }}">Budget Actions</a></li>
+              <li><a href="{{ url_for('reconcile') }}">Monthly Budget Reconcile</a></li>
+              <li><a href="{{ url_for('search') }}">Budget Search</a></li>
+            </ul>
+          </div>
+        </li>
+
+        <li><a href="{{ url_for('maint_actions') }}">Maintenance <span class="caret"></span></a>
+          <div>
+            <ul>
+              <li><a href="{{ url_for('maint_actions') }}">Maintenance Actions</a></li>
+            </ul>
+          </div>
+        </li>
+
+
+        {% if current_user.is_anonymous %}
+        <li><a href="{{ url_for('login') }}">Login<span></span></a>
+        {% else %}
+        <li><a href="{{ url_for('logout') }}">Logout<span></span></a>
+        {% endif %}
+        </li>
+      </ul>
+    </nav>
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+ {% block body %}{% endblock %}
+ 
+</body>
+</html>

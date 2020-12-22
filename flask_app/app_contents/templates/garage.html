@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="block1">
+<h1>Garage Doors</h1>
+<h2>Garage Door A is : {{gdoor_a_state}}<br>
+<a href="{{ url_for('garage_action', gdoor = 'a') }}">{{gdoor_a_action}} Garage Door A</a><br><br>
+Garage Door B is : {{gdoor_b_state|safe}}<br>
+<a href="{{ url_for('garage_action', gdoor = 'b') }}">{{gdoor_b_action}} Garage Door B</a><br></h2>
+</div>
+{% endblock %}

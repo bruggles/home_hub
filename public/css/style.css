@@ -1,0 +1,45 @@
+body {
+	background-color: #fff;
+	color: #444;
+	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+	font-weight:300 ;
+	font-size: 50px;
+}
+
+h1,.h1{font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;font-weight:normal;line-height:1.1;color:#444}h1 small,h2 small,h3 small,h4 small,h5 small,h6 small,.h1 small,.h2 small,.h3 small,.h4 small,.h5 small,.h6 small{font-weight:normal;line-height:1}
+h1,.h1{font-size:60px;line-height:48px}
+
+a{color:#3282e6;}
+a:hover,a:focus{color:#165db5;text-decoration:underline}
+
+button {
+  font-size:85%;
+  color:#444;
+  text-transform: uppercase;
+  font-weight: bold;
+  }
+ 
+
+/*Table Style Elements*/
+table, th, td {
+    border: 1px solid #444;
+    border-collapse: collapse;
+    padding: 2px 0 2px 12px;
+}
+
+th {
+    /*text-align: center;*/
+    font-size: 1.6em;
+    font-weight: normal;
+    line-height: 1.2em;
+}
+
+td {
+    /*text-align: center;*/
+    font-size: 1.25em;
+	font-weight: normal;
+}
+
+tr:nth-child(even) {
+    background-color: #dedede;
+}

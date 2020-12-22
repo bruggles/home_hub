@@ -1,0 +1,9 @@
+#first run the setup script by running this in a python terminal ensure that the db string matches the new db
+from functions import db_setup
+db_setup()
+#with the old db open run
+attach database '/home/pi/repos/home_hub/flask_app/app_contents/home_hub.db' as new_db;
+insert into new_db.budget_amt select Null as key, ba.date as date, ba.category as category, ba.amount as amount, ba.notes as notes, ba.active as active, 'bruggles' as app_group from budget_amt ba;
+insert into new_db.budget_sum select Null as key, bs.date as date, bs.category as category, bs.amount as amount, bs.notes as notes, 'bruggles' as app_group from budget_sum bs;
+insert into new_db.spent select s.key as key, s.date as date, s.category as category, s.amount as amount, s.notes as notes, 'bruggles' as app_group from spent s;
+#after this make sure all paths are setup to the new db

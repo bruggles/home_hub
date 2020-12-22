@@ -1,0 +1,49 @@
+this all comes from a bunch of random tutorials, but the authentication came from 
+https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-v-user-logins
+
+the NGINX serving stuff comes from
+https://www.raspberrypi-spy.co.uk/2018/12/running-flask-under-nginx-raspberry-pi/
+
+For NGINX setup on a fresh install for raspberry pi
+sudo apt-get update
+sudo apt-get install nginx
+sudo apt-get install python3-pip
+sudo pip3 install flask uwsgi flask_login flask_sqlalchemy flask_wtf email-validator phonenumbers python-dotenv pysftp
+
+setup environment variables in a .env file
+put the following lines with the details filled in your_repo_home_directory/vars.env 
+export TWILIO_SID="sid_from_twilio"
+export TWILIO_TOKEN="token_from_twilio"
+export TWILIO_PHONE="+1phonenumberfromtwilio"
+export SECRET_KEY="a_long_string-of_text-and_numbers"
+export URL_PROD="www.myurl.com"
+export ACCESS_KEYS="an_access_key_to_use_for_registration, another_key"
+export GARAGE_NUMS="+1usnumber, +1anothernumber"
+export LOVE_NUMS="+1usnumber,"
+put this file in the gitignore either globaly or locally
+
+note on environment varialbes, the TWILIO ones come from Twilio when you set up your account, the phone number is +1 and then the 10 digit number without spaces
+    the secret key is a made up long alphanumeric string. the garage nums are phone numbers that can use the garage functions.
+
+run the nginx_setup.sh script
+
+change the timezone
+to see available zones 'timedatectl list-timezones'
+change time zones 'sudo timedatectl set-timezone America/Denver'
+restart cron to use the new timezone 'sudo service cron restart'
+
+create a db in the app_contents directory
+sqlite3 home_hub.db
+.exit
+chmod 666 home_hub.db
+
+add cron to update budgets monthly
+to edit the schedule 'crontab -e'
+0 3 1 * * python3 /home/pi/repos/home_hub/flask_app/app_contents/monthly_budget_add.py
+
+add cron to backup the database 1x per week - would be a good idea to backup on remote server as well
+0 7 * * 0 cp /home/pi/repos/home_hub/flask_app/app_contents/home_hub.db /home/pi/data/backups/home_hub.db.backup.$(date$
+5 7 * * 0 ls -t1 /home/pi/data/backups/home_hub.db.backup.* | sort -r | tail -n +11 | xargs rm -f
+
+ssh to open/close garage doors through text
+you will need to copy your .ssh to /var/www and sudo -R chown www-data.adm .ssh after copying it there

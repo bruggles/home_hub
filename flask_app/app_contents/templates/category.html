@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="block1">
+<h1>{{title}}</h1>
+{{category_table|safe}}<br>
+<h2>Amount left in {{category_sql.capitalize()}}</h2>
+<h3>{{remaining_budget}}</h3><br>
+{{mnth_table|safe}}<br>
+{{aloc_table|safe}}<br>
+</div>
+{% endblock %}

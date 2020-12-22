@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block body %}
+ 
+<div class="block1">
+<h1>Available Budget Actions</h1>
+<h3><a href="{{ url_for('bud') }}">Document Expenses (bud)</a><br></h3>
+<h3><a href="{{ url_for('new') }}">Create a new Budget category (new)</a><br></h3>
+<h3><a href="{{ url_for('add') }}">Add Money to Available Budget (add)</a><br></h3>
+<h3><a href="{{ url_for('move') }}">Move Money from Budget to Budget (move)</a><br></h3>
+<h3><a href="{{ url_for('mod') }}">Modify Monthly Budget Allocations for 1 Category (mod)</a><br></h3>
+<h3><a href="{{ url_for('upd') }}">Update Expense Category (upd)</a><br></h3>
+<h3><a href="{{ url_for('delete') }}">Delete 1 Entry (del)</a><br></h3>
+
+</div>
+{% endblock %}

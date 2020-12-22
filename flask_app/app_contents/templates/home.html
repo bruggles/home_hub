@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block body %}
+ 
+<div class="block1">
+<h1>Budget Stuff</h1>
+<h3><a href="{{ url_for('budget_sum', _external=True) }}">Budget Summary</a><br></h3>
+<h3><a href="{{ url_for('category') }}">Category Summaries</a><br></h3>
+<h3><a href="{{ url_for('mnths') }}">Month Summaries</a><br></h3>
+<h3><a href="{{ url_for('actions') }}">Budget Actions</a><br></h3>
+<h3><a href="{{ url_for('reconcile') }}">Monthly Budget Reconcile</a><br></h3>
+<h3><a href="{{ url_for('search') }}">Budget Search</a><br></h3>
+<br>
+
+<h1>Maintenance Stuff</h1>
+<h3><a href="{{ url_for('maint_actions') }}">Maintenance Actions</a><br></h3>
+<br>
+
+<h1>Garage Doors</h1>
+<h3><a href="{{ url_for('garage_action') }}">Garage Door Details</a><br></h3>
+<h3><a href="{{ url_for('garage_action', gdoor = 'a') }}">Open/Close Garage Door </a><br></h3>
+<h3><a href="{{ url_for('garage_action', gdoor = 'b') }}">Open/Close Garage Door B</a><br></h3>
+<br>
+
+<h1>Text Message Stuff</h1>
+<h3>Alfonso Budget's Phone Number: 435-334-4489<h3>
+<h3><a href="{{ url_for('manual') }}">Text Instructions</a>
+</div>
+{% endblock %}

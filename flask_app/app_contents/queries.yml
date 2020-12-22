@@ -1,0 +1,438 @@
+remaining_budget_by_category:
+  select
+    bs.category,
+    case
+      when sp.amount is null
+      then (bs.amount*1.00)/100.00
+      else((bs.amount*1.00)-(sp.amount*1.00))/100.00
+    end as amount_remaining
+  from
+      (select
+        category,
+        sum(amount) as amount
+      from budget_sum
+      where app_group  = ?
+      group by category) bs
+  left join
+      (select
+        category,
+        sum(amount) as amount
+      from spent
+      where app_group  = ?
+      group by category) sp
+    on sp.category = bs.category
+  group by bs.category;
+
+remaining_budget_by_category_month:
+  select
+    bs.category,
+    case
+      when sp.amount is null
+      then (bs.amount*1.00)/100.00
+      else ((bs.amount*1.00)-(sp.amount*1.00))/100.00 end as amount_remaining
+  from
+    (select
+      category,
+      sum(amount) as amount
+    from budget_sum
+    where (strftime('%Y',date)*100 + strftime('%m', date))<= ?
+    and app_group  = ?
+    group by category) bs
+  left join
+    (select
+      category,
+      sum(amount) as amount
+    from spent
+    where (strftime('%Y',date)*100 + strftime('%m', date))<= ?
+    and app_group  = ?
+    group by category) sp
+  on sp.category = bs.category
+  group by bs.category;
+
+category_report:
+  select
+    key,
+    date,
+    category,
+    (amount*1.00)/100.00 as amount,
+    notes
+  from spent 
+  where category = ?
+  and app_group = ? 
+  order by key desc 
+  limit 15;
+
+sms_last:
+  select
+    key,
+    category,
+    (amount*1.00)/100.00 as amount,
+    notes
+  from spent
+  where app_group  = ? 
+  order by key desc 
+  limit 5;
+
+sms_category_last:
+  select
+    key,
+    (amount*1.00)/100.00 as amount,
+    notes
+  from spent 
+  where category = ?
+  and app_group = ? 
+  order by key desc 
+  limit 5;
+
+remaining_category_budget:
+  select
+    bs.category,
+    case
+      when sp.amount is null
+      then (bs.amount*1.00)/100.00
+      else ((bs.amount*1.00)-(sp.amount*1.00))/100.00 end as amount_remaining
+  from
+    (select
+      category,
+      sum(amount) as amount
+    from budget_sum 
+    where app_group  = ?
+    group by category) bs
+  left join
+    (select
+      category,
+      sum(amount) as amount
+    from spent 
+    where app_group  = ?
+    group by category) sp
+  on sp.category = bs.category
+  where bs.category = ?
+  group by bs.category;
+
+remaining_budget:
+  select
+    ((bs.amount*1.00)-(sp.amount*1.00))/100.0 as amount_remaining
+  from
+    (select 
+      "a" as key,
+      sum(amount) as amount
+    from budget_sum
+    where app_group  = ?) bs
+  left join
+    (select 
+      "a" as key,
+      sum(amount) as amount
+    from spent
+    where app_group  = ?) sp
+  on bs.key = sp.key;
+
+remaining_budget_month:
+  select
+    ((bs.amount*1.00)-(sp.amount*1.00))/100.0 as amount_remaining
+  from
+    (select
+      "a" as key,
+      sum(amount) as amount
+    from budget_sum
+    where (strftime('%Y',date)*100 + strftime('%m', date))<= ?
+    and app_group = ?) bs
+  left join
+    (select
+      "a" as key,
+      sum(amount) as amount
+    from spent
+    where (strftime('%Y',date)*100 + strftime('%m', date))<= ?
+    and app_group = ?) sp
+  on bs.key = sp.key;
+
+spend_per_month:
+  select
+    strftime('%Y',date)*100 + strftime('%m', date) as spend_month,
+    sum(amount)*1.00/100.00 as spent
+  from spent
+  where app_group  = ?
+  group by spend_month
+  order by spend_month desc
+  limit 13;
+
+category_spend_per_month:
+  select
+    strftime('%Y',date)*100 + strftime('%m', date) as spend_month,
+    sum(amount)*1.00/100.00 as spent
+  from spent
+  where category = ?
+    and app_group  = ?
+  group by spend_month
+  order by spend_month desc
+  limit 13;
+
+spent_in_month:
+  select
+    sum(amount)*1.00/100.00 as amount
+  from spent
+  where (strftime('%Y',date)*100 + strftime('%m', date))= ?
+    and app_group  = ?;
+
+spent_in_month_category:
+  select
+    sum(amount)*1.00/100.00 as amount
+  from spent
+  where (strftime('%Y',date)*100 + strftime('%m', date))= ?
+    and category = ?
+    and app_group  = ?;
+
+monthly_expenses:
+  select
+    key,
+    date,
+    category,
+    (amount*1.00)/100.00 as amount,
+    notes
+  from spent
+  where (strftime('%Y',date)*100 + strftime('%m', date))= ?
+    and app_group = ?
+  order by amount desc;
+
+monthly_expenses_category:
+  select
+    key,
+    date,
+    category,
+    (amount*1.00)/100.00 as amount,
+    notes
+  from spent
+  where (strftime('%Y',date)*100 + strftime('%m', date))= ?
+    and app_group = ?
+    and category = ?
+  order by amount desc;
+
+spent_per_category_in_month:
+    select
+      category,
+      sum(amount)*1.00/100.00 as amount
+    from spent
+    where strftime('%Y',date)*100 + strftime('%m', date) = ?
+      and app_group = ?
+    group by category order by category
+
+mnths:
+  select
+    strftime('%Y',date)*100 + strftime('%m', date) as mnth
+  from spent
+  where app_group  = ?
+  group by strftime('%Y',date)*100 + strftime('%m', date)
+  order by mnth desc
+  limit 13;
+
+recent_month:
+  select
+    strftime('%Y',date)*100 + strftime('%m', date) as mnth
+  from spent
+  where app_group = ?
+  group by strftime('%Y',date)*100 + strftime('%m', date)
+  order by mnth desc
+  limit 1;
+
+categories:
+  select
+    distinct category
+  from spent
+  where app_group  = ?;
+
+rogue:
+  select distinct 
+    s.category 
+  from 
+    spent s 
+  left join 
+    budget_sum bs 
+    on s.category=bs.category  
+  where bs.category is null
+    and s.app_group = ?;
+
+rogue_spend:
+  select 
+    sp.category, 
+    (sum(sp.amount)*1.00)/100.00 as spent 
+  from 
+    spent sp 
+  where category in((select distinct 
+                      s.category 
+                    from spent s 
+                    left join budget_sum bs 
+                      on s.category=bs.category
+                    where bs.category is null
+                      and s.app_group = ?))
+  group by sp.category;
+
+rogue_spend_month:
+  select
+    sp.category,
+    (sum(sp.amount)*1.00)/100.00 as spent
+  from
+    spent sp
+  where category in((select distinct
+                      s.category
+                    from spent s
+                    left join budget_sum bs
+                      on s.category=bs.category
+                    where bs.category is null))
+    and strftime('%Y',sp.date)*100 + strftime('%m', sp.date) = ?
+      and app_group = ?
+  group by sp.category;
+
+monthly_budget_add:
+  insert into budget_sum 
+    select 
+      (date('now')), 
+      category, 
+      amount, 
+      notes 
+    from budget_amt 
+    where active=1
+      and app_group = ?;
+
+search:
+  select
+    key,
+    date,
+    category,
+    (amount*1.00)/100.00 as amount,
+    notes
+  from spent
+  where (lower(notes) like ?
+    or lower(category) like ?)
+    and app_group = ?
+  order by date desc;
+
+bud:
+  INSERT INTO spent VALUES(Null,?,?,?,?,?);
+
+add:
+  INSERT INTO budget_sum VALUES(Null,?,?,?,?,?);
+
+mod1:
+  update budget_amt set active = 0 where category = ? and app_group = ?;
+
+mod2:
+  INSERT INTO budget_amt VALUES(Null,?,?,?,?,?,?);
+
+move:
+  INSERT INTO budget_sum VALUES(Null,?,?,?,?,?);
+
+upd:
+  update spent set category = ? where category = ? and app_group = ?;
+
+upd2:
+  update budget_sum set category = ? where category = ? and app_group = ?;
+
+upd3:
+  update budget_amt set category = ? where category = ? and app_group = ?;
+
+del:
+  delete from spent where key = ?
+
+allocations_by_category:
+  select
+    category,
+    amount/100 as amount
+  from budget_amt
+  where active =1
+  and app_group = ?;
+
+allocation_one_category:
+  select
+    date as date_changed,
+    amount/100 as amount_after_change_date,
+    case when active = 0 then 'No' else 'Yes' end as active
+  from budget_amt
+  where category = ?
+  and app_group = ?;
+
+machines:
+  select distinct 
+    machine
+  from machine
+  where app_group = ?;
+
+machine_deactivate:
+  update machine set active = 0 where machine = ? and app_group = ?;
+
+machine:
+  INSERT INTO machine values(Null,?,?,?,?,?,?,?,?,?);
+
+maint:
+  INSERT INTO maintenance values(Null,?,?,?,?,?,?,?);
+
+maint_schedule:
+  INSERT INTO maintenance_schedule values(Null,?,?,?,?,?,?,?)
+
+budget_amt_schema:
+  CREATE TABLE IF NOT EXISTS budget_amt(
+    key INTEGER PRIMARY KEY, 
+    date TEXT,
+    category TEXT,
+    amount INT,
+    notes TEXT,
+    active INT,
+    app_group TEXT
+  );
+
+budget_sum_schema:
+  CREATE TABLE IF NOT EXISTS budget_sum(
+    key INTEGER PRIMARY KEY, 
+    date TEXT,
+    category TEXT,
+    amount INT,
+    notes TEXT,
+    app_group TEXT
+  );
+
+spent_schema:
+  CREATE TABLE IF NOT EXISTS spent(
+    key INTEGER PRIMARY KEY, 
+    date TEXT, 
+    category TEXT, 
+    amount INT, 
+    notes TEXT,
+    app_group TEXT
+  );
+
+maintenance_schema:
+  CREATE TABLE IF NOT EXISTS maintenance(
+    key INTEGER PRIMARY KEY,
+    date TEXT,
+    machine TEXT,
+    miles TEXT,
+    notes TEXT,
+    category TEXT,
+    service TEXT,
+    app_group TEXT
+  );
+
+machine_schema:
+  CREATE TABLE IF NOT EXISTS machine(
+    key INTEGER PRIMARY KEY, 
+    date TEXT,
+    machine TEXT,
+    machine_type TEXT,
+    purchase_dt TEXT,
+    miles_applicable INTEGER,
+    avg_miles_year INTEGER,
+    purchase_miles INTEGER,
+    active INTEGER,
+    app_group TEXT
+  );
+
+maintenance_schedule_schema:
+  CREATE TABLE IF NOT EXISTS maintenance_schedule(
+    key INTEGER PRIMARY KEY,
+    machine TEXT,
+    category TEXT,
+    service TEXT,
+    frequency_type TEXT,
+    frequency INTEGER,
+    active INTEGER,
+    app_group TEXT
+  );
+

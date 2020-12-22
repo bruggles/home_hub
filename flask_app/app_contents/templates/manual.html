@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block body %}
+ 
+<div class="block1">
+<h1>Text Message Budget Manual</h1>
+<h3>Budget Actions</h3>
+<ul>
+  <li>Add budget expense entry: bud category amount notes - ie. bud home 15 home depot</li>
+  <li>Add money to a budget: add category amount notes - ie. add home 25 bonus</li>
+  <li>Move money from one available budget to another: move amount from_category to_category - ie. move 50 brandon sheena</li>
+  <li>Modify monthy budget amount: mod category amount notes - ie. mod brandon 50 change from 40</li>
+  <li>Update categories: upd from_category to_category - ie. upd groceries food </li>
+  <li>Delete entry by number: del number - ie. del 1234</li>
+</ul>
+<h3>Budget Reports</h3>
+<ul>
+  <li>This month summary report: sum </li>
+  <li>Category report: rep category ie. rep brandon - or just the category name </li>
+</ul>
+<h1>Text Message Maintenance Manual</h1>
+<h3>Maintenance Actions</h3>
+<ul>
+  <li>Add maintenance record: maintenance machine miles notes - ie. lexus 110000 oil change - if no miles ie. furnace 0 filter change </li>
+</ul>
+<h1>Text Message Garage Manual</h1>
+<h3>Garage Actions</h3>
+<ul>
+  <li>Check garage status: garage </li>
+  <li>Open garage: open garage_name - ie. open a</li>
+  <li>Close garage: clsoe garage_name - ie. close b</li>
+</ul>
+</div>
+{% endblock %}

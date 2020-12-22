@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block body %}
+ 
+<div class="block1">
+<h1>Available Maintenance Actions</h1>
+<h3><a href="{{ url_for('machine') }}">Add a Machine to Maintain (machine)</a><br></h3>
+<h3><a href="{{ url_for('maintenance') }}">Add a Maintenance Record (maint)</a><br></h3>
+<h3><a href="{{ url_for('maint_schedule') }}">Create a Maintenance Schedule</a><br></h3>
+
+</div>
+{% endblock %}

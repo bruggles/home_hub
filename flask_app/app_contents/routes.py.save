@@ -1,0 +1,340 @@
+#! /usr/bin/python3
+
+from flask import render_template, flash, redirect, url_for, request, session
+from app_contents import db, app
+from app_contents.forms import LoginForm, RegistrationForm, BudAddMod, Move, Update, Delete, Search 
+from flask_login import current_user, login_user, logout_user, login_required
+from app_contents.models import User
+import os, sqlite3, calendar
+from werkzeug.urls import url_parse
+from app_contents.garage import reset_buttons, gdoor_stats, gdoors
+import os
+import app_contents.config as config
+from flask_wtf.csrf import CSRFProtect
+import yaml
+from app_contents.functions import text_send, html_table, link_list, std_link, num_link, mnth_cat_link, cat_mnth_link, db_submit, db_data
+from datetime import date
+
+app_contents = os.path.abspath(os.path.dirname(__file__))
+repo_dir = os.path.abspath(os.path.join(app_contents, '../..'))
+flask_dir = os.path.abspath(os.path.join(app_contents, '..'))
+today = date.today()
+today2 = today.strftime('%Y-%m-%d')
+
+zero = 0
+one = 1
+null = None
+
+test_state = 'prod'
+if test_state == 'prod':
+    url_string = "http://www.brandonruggles.com"
+else:
+    url_string = "http://127.0.0.1:5000"
+
+with open(os.path.join(app_contents, 'queries.yml'), 'r') as file:
+        queries = yaml.load(file, Loader=yaml.FullLoader)
+DB_STRING = os.path.join(repo_dir,'budget.db')
+conn = sqlite3.connect(DB_STRING, check_same_thread=False)
+conn.row_factory = sqlite3.Row # this powers some of the row functionality
+c = conn.cursor()
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    print('login')
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = LoginForm()
+    print('pre_validate')
+    if form.validate_on_submit():
+        print('validated')
+        user = User.query.filter_by(username=form.username.data).first()
+        app.logger.debug(f"user:{user.username}")
+        app.logger.debug(f"pw:{user.check_password(form.password.data)}")
+        session['user'] = user.username
+        session['app_group'] = user.app_group
+        session['garage_access'] = user.garage_access
+        if user is None or not user.check_password(form.password.data):
+            flash('Invalid username or password')
+            return redirect(url_for('login'))
+        app.logger.debug(f"remember:{form.remember_me.data}")
+        login_user(user, remember=form.remember_me.data)
+        #next_page = request.args.get('next')
+        #if not next_page or url_parse(next_page).netloc != '':
+        #    next_page = url_for('index')
+        #return redirect(next_page)
+        print('almost redirect')
+        return redirect(url_for('index'))
+    return render_template('login.html', title='Sign In', form=form)
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        user = User(username=form.username.data, email=form.email.data, app_group='', garage_access="")
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        flash('Congratulations, you are now a registered user!')
+        return redirect(url_for('login'))
+    return render_template('register.html', title='Register', form=form)
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
+
+@app.route("/")
+@app.route('/index')
+@login_required
+def index():
+    gdoorA_state, gdoorA_action, gdoorB_state, gdoorB_action = gdoor_stats()
+    #user = session['user']
+    return render_template('home.html', **locals())
+
+@app.route('/sms', methods=['POST'])
+def sms():
+    number = request.form['From']
+    message_body = request.form['Body']
+    message = 'Hello {}, you said: {}'.format(number, message_body)
+    text_send(body=message, to=number)
+    return str(resp)
+
+@app.route('/category')
+@app.route('/category/<category_sql>')
+@login_required
+def category(category_sql = None):
+    title = 'Budget Categories'
+    if category_sql == None:
+        cat = c.execute(queries['categories'])
+        link_list_attrs = {'data' : cat,
+                            'title' : 'Available Categories',
+                            'link_func' : std_link,
+                            'link_path' : url_for('category')}
+        category_links = link_list(link_list_attrs)
+        return render_template('category_links.html', **locals())
+    else:
+        title = '%s Report' % category_sql.capitalize()
+        data = c.execute(queries['category_report'], (category_sql,))
+        table_attrs = {'data' : data,
+                        'title' : 'Last items entered in %s budget' % category_sql.capitalize()}
+        category_table = html_table(table_attrs=table_attrs)
+
+        # left in budget
+        remaining = c.execute(queries['remaining_category_budget'], (category_sql,))
+        remaining_budget = []
+        for thing in remaining:
+            remaining_budget = thing[1]
+
+        #spent by month
+        m = c.execute(queries['category_spend_per_month'], (category_sql,))
+        #need link /mnths/<mnth_num>/<category>
+        table_attrs = {'data' : m,
+                        'title' : 'Spend by Month in %s' % category_sql.capitalize(),
+                        'link_col' : 'spend_month',
+                        'link_func' : mnth_cat_link,
+                        'link_path' : url_for('mnths'),
+                        'category' : category_sql}
+        mnth_table = html_table(table_attrs=table_attrs)
+
+        # Allocation_one_category
+        aloc = c.execute(queries['allocation_one_category'], (category_sql,))
+        table_attrs = {'data' : aloc,
+                        'title' : 'Monthly Allocations'}
+        aloc_table = html_table(table_attrs=table_attrs)
+
+        return render_template('category.html', **locals())
+
+@app.route('/mnths')
+@app.route('/mnths/<mnth>')
+@app.route('/mnths/<mnth>/<category>')
+@login_required
+def mnths(mnth=None, category=None):
+        if mnth == None:
+            recent_month = c.execute(queries['recent_month'])
+            for thing in recent_month:
+                mnth = thing[0]
+
+            #mnth = today.strftime("%Y%m")
+        mnth = int(mnth)
+        month_display = str(calendar.month_name[int(str(mnth)[4:6])]) + " " + str(mnth)[0:4]
+        if category == None:
+            title = "%s Report" % month_display
+            spent = c.execute(queries['spent_in_month'], (mnth,))
+            for thing in spent:
+                month_spent = thing[0]
+
+            #individual transactions recorded for month
+            r = c.execute(queries['monthly_expenses'], (mnth,))
+            table_attrs = {'data' : r,
+                            'title' : 'Items entered in in %s' % month_display}
+            mnth_table = html_table(table_attrs=table_attrs)
+            # spent per category in month
+            m = c.execute(queries['spent_per_category_in_month'], (mnth,))
+            table_attrs = {'data' : m,
+                            'title' : 'Spent in %s' % month_display,
+                            'link_col' : 'category',
+                            'link_func' : cat_mnth_link,
+                            'link_path' : url_for('mnths'),
+                            'month': mnth}
+            cat_mnth_table = html_table(table_attrs=table_attrs)
+
+            mnths = c.execute(queries['mnths'])
+            link_list_attrs = {'data' : mnths,
+                            'title' : 'Available Months',
+                            'link_func' : num_link,
+                            'link_path' : url_for('mnths')}
+            mnth_list = link_list(link_list_attrs)
+            return render_template('mnth.html', **locals())
+        else:
+            spent = c.execute(queries['spent_in_month_category'], (mnth, category))
+            for thing in spent:
+                month_spent = thing[0]
+            r = c.execute(queries['monthly_expenses_category'], (mnth, category))
+            table_attrs = {'data' : r,
+                'title' : 'Items entered in %s in %s' % (category, month_display)}
+            expense_table = html_table(table_attrs=table_attrs)
+            return render_template('mnth_category.html', **locals())
+
+@app.route("/budget/summary")
+@login_required
+def budget_sum():
+
+    r1 = c.execute(queries['remaining_budget'])
+    table_attrs = {'data' : r1,
+                   'title' : 'Budget Remaining'}
+    rem_table = html_table(table_attrs=table_attrs)
+
+    r = c.execute(queries['remaining_budget_by_category'])
+    table_attrs = {'data' : r,
+                   'title' : 'Budget Remaining per Cateogy',
+                   'link_col' : 'category',
+                   'link_func' : std_link,
+                   'link_path' : url_for('category')}
+    bud_table = html_table(table_attrs=table_attrs)
+
+    a = c.execute(queries['allocations_by_category'])
+    table_attrs = {'data' : a,
+                   'title' : 'Monthly Allocations by Category',
+                   'link_col' : 'category',
+                   'link_func' : std_link,
+                   'link_path' : url_for('category')}
+    aloc_table = html_table(table_attrs=table_attrs)
+
+    m = c.execute(queries['spend_per_month'])
+    table_attrs = {'data' : m,
+                   'title' : 'Spent per Month',
+                   'link_col' : 'spend_month',
+                   'link_func' : num_link,
+                   'link_path' : url_for('mnths')}
+    month_table = html_table(table_attrs=table_attrs)
+
+    return render_template(
+        'budget_sum.html',**locals())
+
+@app.route("/garage")
+@app.route("/garage/<string:gdoor>")
+@login_required
+def garage_action(gdoor=None):
+    gdoorA_state, gdoorA_action, gdoorB_state, gdoorB_action = gdoor_stats()
+    gdoors(gdoor)
+    return render_template('garage.html',**locals())
+
+@app.route('/budget/search', methods=['GET', 'POST'])
+@login_required
+def search():
+    form = Search()
+    if form.validate_on_submit():
+        p = '%'
+        search_string = '%s%s%s' % (p,form.search_string.data,p)
+        s = db_data('search', (search_string, search_string))
+        table_attrs = {'data' : s,
+                   'title' : 'Budget Entries matching serarch term "%s"' % form.search_string.data}
+        search_table = html_table(table_attrs=table_attrs)
+        return render_template('search.html', **locals())
+    return render_template('auto_form.html', title = 'Search for Budget Entries', form=form)
+
+@app.route("/budget/action/bud", methods=['GET', 'POST'])
+@login_required
+def bud():
+    form = BudAddMod()
+    if form.validate_on_submit():
+        amount = form.amount.data*100
+        db_submit('bud',(null,today2,form.category.data,amount,form.notes.data))
+        flash_text = "You submited an expense for %s to %s totaling %s" % (form.notes.data, form.category.data, form.amount.data)
+        flash(flash_text)
+        return redirect(url_for('actions'))
+    return render_template('auto_form.html', title='Budget Entry', form=form)
+
+@app.route("/budget/action/add", methods=['GET', 'POST'])
+@login_required
+def add():
+    form = BudAddMod()
+    if form.validate_on_submit():
+        amount = form.amount.data*100
+        db_submit('add',(today2,form.category.data,amount,form.notes.data))
+        flash_text = "You added $%s into %s with these notes: %s" % (form.amount.data, form.category.data, form.notes.data)
+        flash(flash_text)
+        return redirect(url_for('actions'))
+    return render_template('auto_form.html', title='Add Money to Budget', form=form)
+
+@app.route("/budget/action/mod", methods=['GET', 'POST'])
+@login_required
+def mod():
+    form = BudAddMod()
+    if form.validate_on_submit():
+        amount = form.amount.data*100
+        db_submit('mod1',(form.category.data,))
+        db_submit('mod2',(today2,form.category.data,amount,form.notes.data,1))
+        flash_text = "You modified the monthly allocation for %s to $%s per month with thest notes: %s" % (form.category.data, form.amount.data, form.notes.data)
+        flash(flash_text)
+        return redirect(url_for('actions'))
+    return render_template('auto_form.html', title='Monthly Allocation Adjustment', form=form)
+
+@app.route("/budget/action/move", methods=['GET', 'POST'])
+@login_required
+def move():
+    form = Move()
+    if form.validate_on_submit():
+        amount = form.amount.data*100
+        amount_neg = 0-amount
+        rem_notes = 'moved to ' + form.to_category.data
+        db_submit('move',(today2,form.from_category.data,amount_neg,rem_notes))
+        add_notes = 'moved from ' + form.from_category.data
+        db_submit('move',(today2,form.to_category.data,amount,add_notes))
+        flash_text = "You moved $%s from %s to %s" % (form.amount.data, form.from_category.data, form.to_category.data)
+        flash(flash_text)
+        return redirect(url_for('actions'))
+    return render_template('auto_form.html', title='Move Money from one Budget to Anothert', form=form)
+
+@app.route("/budget/action/update", methods=['GET', 'POST'])
+@login_required
+def upd():
+    form = Update()
+    if form.validate_on_submit():
+        db_submit('upd',(form.to_category.data, form.from_category.data))
+        flash_text = "You updated everything in %s to %s" % (form.from_category.data, form.to_category.data)
+        flash(flash_text)
+        return redirect(url_for('actions'))
+    return render_template('auto_form.html', title='Move all items in a Category to Another Category', form=form)
+
+@app.route("/budget/action/delete", methods=['GET', 'POST'])
+@login_required
+def delete():
+    form = Delete()
+    if form.validate_on_submit():
+        db_submit('del', (form.id.data,))
+        flash_text = "You deleted the entry with id number %s" % form.id.data
+        flash(flash_text)
+        return redirect(url_for('actions'))
+    return render_template('auto_form.html', title='Delete Budget Entry', form=form)
+
+
+
+@app.route("/budget/action")
+@login_required
+def actions():
+    return render_template('actions.html', title="Available Actions")
+
+
