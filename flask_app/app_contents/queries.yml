@@ -237,7 +237,8 @@ categories:
   select
     distinct category
   from spent
-  where app_group  = ?;
+  where app_group  = ?
+  order by category;
 
 rogue:
   select distinct 
