@@ -399,14 +399,27 @@ spent_schema:
     app_group TEXT
   );
 
-income_schema:
- CREATE TABLE IF NOT EXISTS income(
+recurring_income_schema:
+ CREATE TABLE IF NOT EXISTS recurring_income(
     key INTEGER PRIMARY KEY,
     date TEXT,
     description TEXT,
     account TEXT,
     amount INT,
     income_type TEXT,
+    tax_status TEXT,
+    notes TEXT,
+    app_group TEXT,
+    active INT
+  );
+
+monthly_income_schema:
+ CREATE TABLE IF NOT EXISTS monthly_income(
+    key INTEGER PRIMARY KEY,
+    date TEXT,
+    description TEXT,
+    account TEXT,
+    amount INT,
     tax_status TEXT,
     notes TEXT,
     app_group TEXT,
@@ -424,63 +437,6 @@ account_schema:
     active INT
   );
 
-account_type_schema:
- CREATE TABLE IF NOT EXISTS account_type(
-    key INTEGER PRIMARY KEY,
-    account_type TEXT,
-    description TEXT
-  );
-
-account_type_entry1:
-    insert or ignore into account_type values(1,'working_savings', 'this is the savings account used for budgeting and saving money from excess budget amounts, only one working savings account can be used');
-
-account_type_entry2:
-    insert or ignore into account_type values(2,'long_term_save', 'this savings account is just a place to store money long term');
-
-account_type_entry3:
-    insert or ignore into account_type values(3,'checking', 'this is a checking account, multiple checking accounts can be used');
-
-account_type_entry4:
-    insert or ignore into account_type values(4,'credit_card', 'this is a credit card account, multiple credit card accounts can be used');
-
-income_type_schema:
- CREATE TABLE IF NOT EXISTS income_type(
-    key INTEGER PRIMARY KEY,
-    income_type TEXT,
-    description TEXT
-  );
-
-income_type_entry1:
-    insert or ignore into income_type values(1,'static','this is income that is the same from month to month');
-
-income_type_entry2:
-    insert or ignore into income_type values(2,'variable_amount','this is income that comes in regularly, but the amount changes');
-
-income_type_entry3:
-    insert or ignore into income_type values(3,'variable_count','this is income that is the same value each time, but you could receive different quantities ie bi-weekly paychecks could come 2 or 3 times in a month');
-
-expense_type_schema:
- CREATE TABLE IF NOT EXISTS expense_type(
-    key INTEGER PRIMARY KEY,
-    expense_type TEXT,
-    description TEXT 
-  );
-
-expense_type_entry1:
-    insert or ignore into expense_type values(1,'static','this an expense that is the same value from month to month');
-
-expense_type_entry2:
-    insert or ignore into expense_type values(2,'variable_amount','this an expense that comes in regularly, but the amount changes');
-
-expense_type_entry3:
-    insert or ignore into expense_type values(3,'variable_count','this an expense that is the same value each time, but you could receive different quantities ie bi-monthly paychecks could come 2 or 3 times in a month');
-
-expense_type_entry4:
-    insert or ignore into expense_type values(4,'percent_post_tax_income','this is an expense that is a percent of post tax income values');
-
-expense_type_entry5:
-    insert or ignore into expense_type values(5,'percent_pre_tax_income','this is an expense that is a percent of pre tax income values');
-
 recurring_expenses_schema:
  CREATE TABLE IF NOT EXISTS recurring_expenses(
     key INTEGER PRIMARY KEY,
@@ -488,28 +444,65 @@ recurring_expenses_schema:
     desctiption TEXT,
     account TEXT,
     amount INT,
-    percent REAL,
+    percent INT,
     expense_type TEXT,
     notes TEXT,
     app_group TEXT,
     active INT
   );
 
-tax_status_schema:
- CREATE TABLE IF NOT EXISTS tax_status(
+monthly_expenses_schema:
+ CREATE TABLE IF NOT EXISTS monthly_expenses(
     key INTEGER PRIMARY KEY,
-    tax_status TEXT,
-    description TEXT
- );
+    date TEXT,
+    desctiption TEXT,
+    account TEXT,
+    amount INT,
+    expense_type TEXT,
+    notes TEXT,
+    app_group TEXT,
+    active INT
+  );
 
-tax_status_entry1:
-    insert or ignore into tax_status values(1,'pre_tax','any income that you are counting pre tax gets this tax status');
+monthly_account_balances_schema:
+  CREATE TABLE IF NOT EXISTS monthly_account_balances(
+    key INTEGER PRIMARY KEY,
+    date TEXT,
+    account TEXT,
+    amount INT,
+    app_group TEXT,
+    active INT
+  );
 
-tax_status_entry2:
-    insert or ignore into tax_status values(2,'post_tax','any income that you are counting post tax gets this tax status');
+monthly_budget_left_schema:
+ CREATE TABLE IF NOT EXISTS monthly_expenses(
+    key INTEGER PRIMARY KEY,
+    date TEXT,
+    amount INT,
+    app_group TEXT,
+    active INT
+  );
 
-tax_status_entry3:
-    insert or ignore into tax_status values(3,'tax_refund','any income that comes from extra tax payment refunds or returns');
+monthly_expense_count_schema:
+ CREATE TABLE IF NOT EXISTS monthly_expense_count(
+    key INTEGER PRIMARY KEY,
+    recurring_expense_key,
+    date TEXT,
+    expense_count INT,
+    app_group TEXT,
+    active INT
+  );
+
+monthly_income_count_schema:
+ CREATE TABLE IF NOT EXISTS monthly_income_count(
+    key INTEGER PRIMARY KEY,
+    recurring_income_key,
+    date TEXT,
+    income_count INT,
+    app_group TEXT,
+    active INT
+  );
+
 
 maintenance_schema:
   CREATE TABLE IF NOT EXISTS maintenance(

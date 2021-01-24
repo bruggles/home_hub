@@ -77,6 +77,29 @@ class New(FlaskForm):
     category = StringField('New Category', validators=[DataRequired(),Regexp(r'^[\w-]+$')])
     submit = SubmitField('Create New Category')
 
+class Income(FlaskForm):
+    description = StringField('Income Description  (brief ie. Brandon Work)', validators=[DataRequired()])
+    account = SelectField('Account income goes to', validators=[DataRequired()])
+    amount = FloatField('Amount', validators=[DataRequired()])
+    income_type = SelectField('Income Type', choices = [('static','Static Income'),('variable_amt','Variable Amount'),('variable_cnt','Variable Count')],validators=[DataRequired()])
+    income_tax = SelectField('Tax Applied', choices = [('pre_tax','Pre-Tax'),('post_tax','Post-Tax'),('tax_refund','Tax Refund')],validators=[DataRequired()])
+    notes = StringField('Notes', validators=[DataRequired()])
+
+class RecurringExpenses(FlaskForm):
+    description = StringField('Expense Description', validators=[DataRequired()])
+    account = SelectField('Account expense comes from', validators=[DataRequired()])
+    amount = FloatField('Amount', validators=[DataRequired()])
+    percentage = FloatField('Percentage (only if expense type is a percent type otherwise 0)', validators=[DataRequired()])
+    expense_type = SelectField('Expense Type', choices = [('static','Static Expense'),('variable_amt','Variable Expense'),('variable_cnt','Variable Count'),('post_tax_percent','Post Tax Income Percent'),('pre_tax_percent','Pre Tax Income Percent')],validators=[DataRequired()])
+    notes = StringField('Notes', validators=[DataRequired()])
+
+
+class Account(FlaskForm):
+    account = StringField('Account income goes to', validators=[DataRequired()])
+    account_type = SelectField('Account Type', choices = [('working_savings','Working Savings'),('checking','Checking'),('credit_card','Credit Card')],validators=[DataRequired()])
+    min_amount = FloatField('Minimum Amount', validators=[DataRequired()])
+
+
 class Machine(FlaskForm):
     machine = StringField('Machine', validators=[DataRequired()])
     machine_type = SelectField('Machine Type', choices = [('home','Home'),('car','Car'),('yard_equipment','Yard Equipment')],validators=[DataRequired()])
