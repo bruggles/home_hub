@@ -284,14 +284,15 @@ rogue_spend_month:
 
 monthly_budget_add:
   insert into budget_sum 
-    select 
+    select
+      Null, 
       (date('now')), 
       category, 
       amount, 
-      notes 
+      'monthly addition',
+      app_group 
     from budget_amt 
-    where active=1
-      and app_group = ?;
+    where active=1;
 
 search:
   select
