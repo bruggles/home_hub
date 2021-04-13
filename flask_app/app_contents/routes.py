@@ -128,15 +128,15 @@ def sms():
         phone_numbers[instance.phone_num] = instance.app_group
     success = True
     love_nums = os.environ.get('LOVE_NUMS').split(',')
-    today_note = "Happy %s. I hope today is amazing" % today.strftime('%A')
+    today_note = "Happy %s, I hope today is amazing. " % today.strftime('%A')
     if number in love_nums:
-        love_notes = ['You sure are looking good today and ',
-                      'The creator of this app loves you ', 
-                      'I sure hope you are having a good day ', 
+        love_notes = ['You sure are looking good today. ',
+                      'The creator of this app loves you. ', 
+                      'I sure hope you are having a good day. ', 
                       'Thanks for all of your help today. ', 
                       'Your family loves you. ',
                       'I hope you know that your husband - Brandon loves you! ',
-                      'Hey babums ',
+                      'Hey babums. ',
                        today_note]
         love_note = love_notes[randint(0,len(love_notes)-1)]
     else:
@@ -614,9 +614,10 @@ def move():
 @login_required
 def upd():
     categories = db_list(yaml_query='categories', vars=(session.get('app_group'),), tuples=True)
-    rogue = db_list(yaml_query='rogue', vars=(session.get('app_group'),), tuples=True)
+    #rogue = db_list(yaml_query='rogue', vars=(session.get('app_group'),), tuples=True)
     form = Update()
-    form.from_category.choices = rogue
+    #form.from_category.choices = rogue
+    form.from_category.choices = categories
     form.to_category.choices = categories
     if form.validate_on_submit():
         db_submit('upd',(form.to_category.data.lower(), form.from_category.data,session.get('app_group')))
