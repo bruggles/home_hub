@@ -29,3 +29,4 @@ sudo systemctl enable start_garage_sense.service
 
 ssh stuff
 you will need to set up ssh keys in your user and in /root (you can just copy them) they need access to write to the main computer
+ 

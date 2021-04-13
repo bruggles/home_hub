@@ -17,6 +17,7 @@ from twilio import twiml
 import re
 from dotenv import load_dotenv
 from random import randint
+import requests
 
 app_contents = os.path.abspath(os.path.dirname(__file__))
 repo_dir = os.path.abspath(os.path.join(app_contents, '../..'))
@@ -107,6 +108,11 @@ def sms():
     message_body = request.form['Body']
     message_split =  message_body.lower().split()
     signal = message_split[0]
+    try:
+        r = requests.get('https://icanhazdadjoke.com', headers={"Accept":"text/plain"})
+        dad_joke = ' ' + r.text
+    except:
+        dad_joke = ''
     #message = 'Hello {}, you said: {}'.format(number, message_body)
     bud_signal = ['bud', 'budget', 'bad', 'bird']
     mod_signal = ['mod', 'modify']
@@ -286,7 +292,7 @@ def sms():
             message = "Something went wrong\nif you believe you got it right but aren't sure of the category respond with 'sum' to get a report with the categories.\nIf you would like general instructions type 'manual'"
     else:
         message = 'Access denied'
-    message = love_note + message
+    message = love_note + message + dad_joke
     text_send(body=message, to=number)
     return str(message)
 
