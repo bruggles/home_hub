@@ -127,6 +127,7 @@ def sms():
     garage_nums = os.environ.get('GARAGE_NUMS').split(',')
     garage_signal = ['garage','garages','open','close']
     garages = ['a','b']
+    joke_signal = ['joke','jokes','dadjoke','dad','funny','laugh']
 
     #need to dynamically create these lists
     phone_numbers = {}
@@ -288,6 +289,8 @@ def sms():
                         message = "%sGarage %s is %s\n" % (message, garage.upper(), garage_state_names[garage_states[i]])
             else:
                 message = "You don't have access to control or look at the garage doors"
+        elif signal in joke_signal:
+            message = ""
         else:
             message = "Something went wrong\nif you believe you got it right but aren't sure of the category respond with 'sum' to get a report with the categories.\nIf you would like general instructions type 'manual'"
     else:
