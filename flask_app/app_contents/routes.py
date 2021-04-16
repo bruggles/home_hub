@@ -110,7 +110,7 @@ def sms():
     signal = message_split[0]
     try:
         r = requests.get('https://icanhazdadjoke.com', headers={"Accept":"text/plain"})
-        dad_joke = ' ' + r.text
+        dad_joke = '\n' + r.text
     except:
         dad_joke = ''
     #message = 'Hello {}, you said: {}'.format(number, message_body)
@@ -174,7 +174,7 @@ def sms():
                         float(amount)
                     except:
                         success = False
-                        message = 'Budget entries should be formated like category amount notes ie home 50.25 door knob - if it is a new category start out with bud'
+                        message = 'Budget entries should be formated like category amount notes ie home 50.25 door knob - if it is a new category start out with bud.'
                 else:
                     try:
                         category = message_split[1]
@@ -183,23 +183,23 @@ def sms():
                         float(amount)
                     except:
                         success = False
-                        message = '%s entries should be formated like %s category amount notes ie %s home 50.25 door knob' % (signal.title(), signal, signal)
+                        message = '%s entries should be formated like %s category amount notes ie %s home 50.25 door knob.' % (signal.title(), signal, signal)
                 if success:
                     notes = ' '.join(notes_list)
                     sql_amount = int(float(amount)*100)
                     if signal in bud_signal:
                         #make a budget entry
                         db_submit('bud',(today2,category,sql_amount,notes,app_group))
-                        message = 'Got it, I put in an entry for $%s in %s with these notes: %s' % (amount, category, notes)
+                        message = 'Got it, I put in an entry for $%s in %s with these notes: %s.' % (amount, category, notes)
                     elif signal in add_signal:
                         #make a budget addition
                         db_submit('add',(today2,category,sql_amount,notes,app_group))
-                        message = 'okey dokey, I added $%s to %s with these notes: %s' % (amount, category, notes)
+                        message = 'okey dokey, I added $%s to %s with these notes: %s.' % (amount, category, notes)
                     elif signal in mod_signal:
                         #modify a budget allocation
                         db_submit('mod1',(category,app_group))
                         db_submit('mod2',(today2,category,sql_amount,notes,1,app_group))
-                        message = '%s has been modified to get $%s allocated to its budget each month' % (category.title(), amount)
+                        message = '%s has been modified to get $%s allocated to its budget each month.' % (category.title(), amount)
         elif signal in move_signal:
             try:
                 amount = message_split[1]
@@ -212,11 +212,11 @@ def sms():
                     db_submit('move',(today2,from_category,sql_amount_neg,rem_notes,app_group))
                     add_notes = 'moved from ' + from_category
                     db_submit('move',(today2,to_category,sql_amount,add_notes,app_group))
-                    message = 'Moved %s from %s to %s' % (amount, from_category, to_category)
+                    message = 'Moved %s from %s to %s.' % (amount, from_category, to_category)
                 else:
-                    message = 'It looks like the message was formatted correctly or close, but the one or both of the categories are wrong. It should be "move amount from_category to_category"'
+                    message = 'It looks like the message was formatted correctly or close, but the one or both of the categories are wrong. It should be "move amount from_category to_category".'
             except:
-                message = 'Move requests should be formatted like "move amount from_category to_category"'
+                message = 'Move requests should be formatted like "move amount from_category to_category".'
         elif signal in upd_signal:
             try:
                 from_category = message_split[1]
@@ -225,22 +225,22 @@ def sms():
                     db_submit('upd',(to_category, from_category, app_group))
                     db_submit('upd2',(to_category, from_category, app_group))
                     db_submit('upd3',(to_category, from_category, app_group))
-                    message = "You updated everything in %s to %s" % (from_category, to_category)
+                    message = "You updated everything in %s to %s." % (from_category, to_category)
                 else:
-                    message = "It looks like the message was formatted properly, but the category that you tried to move to doesn't exist. The format should be 'update from_category to_category'"
+                    message = "It looks like the message was formatted properly, but the category that you tried to move to doesn't exist. The format should be 'update from_category to_category'."
             except:
-                message = "To update categories the message should be like 'update from_category to_category'"
+                message = "To update categories the message should be like 'update from_category to_category'."
         elif signal in del_signal:
             try:
                 id = int(message_split[1])
                 db_submit('del', (id,))
-                message = "You deleted the entry with id number %s" % id
+                message = "You deleted the entry with id number %s." % id
             except:
-                message = "It looks like you didn't put in an id number after the del or delete command"
+                message = "It looks like you didn't put in an id number after the del or delete command."
         elif signal in summary_signal:
             message = sms_report(app_group = app_group)
         elif signal in man_signal:
-            message = 'Check out the manual online at http://www.brandonruggles.com%s' % url_for('manual')
+            message = 'Check out the manual online at http://www.brandonruggles.com%s.' % url_for('manual')
         elif signal in maint_signal:
             try:
                 machine = message_split[1]
@@ -249,9 +249,9 @@ def sms():
                 category = 'unknown'
                 service = 'unknown'
                 db_submit('maint', (today2, machine.lower(), miles, notes, category, service, app_group))
-                message = 'You logged maintenance on %s with %s as notes at %s miles' % (machine, notes, miles)
+                message = 'You logged maintenance on %s with %s as notes at %s miles.' % (machine, notes, miles)
             except:
-                message = "To log maintenance use this format 'maintenance machine miles notes' ie. 'maintenance lexus 110000 oil change'"
+                message = "To log maintenance use this format 'maintenance machine miles notes' ie. 'maintenance lexus 110000 oil change'."
         elif signal in garage_signal:
             if number in garage_nums:
                 garage_state_names = {0:'closed',1:'open'}
@@ -271,30 +271,30 @@ def sms():
                             if garage_states[i] == 0:
                                 #open garage door
                                 remote(server="garage",command='run', file='garage_open.py',action=garage)
-                                message = "Opening garage door %s" % garage.upper()
+                                message = "Opening garage door %s." % garage.upper()
                             else:
-                                message = "Garage door %s is already open" % garage.upper()
+                                message = "Garage door %s is already open." % garage.upper()
                 elif signal == 'close':
                     for i, garage in enumerate(garages):
                         if message_split[1] == garage:
                             if garage_states[i] == 1:
                                 #close garage door 
                                 remote(server="garage",command='run', file='garage_open.py',action=garage)
-                                message = "Closing garage door %s" % garage.upper()
+                                message = "Closing garage door %s." % garage.upper()
                             else:
-                                message = "Garage door %s is already closed" % garage.upper()
+                                message = "Garage door %s is already closed." % garage.upper()
                 else:
                     message = ""
                     for i, garage in enumerate(garages):
-                        message = "%sGarage %s is %s\n" % (message, garage.upper(), garage_state_names[garage_states[i]])
+                        message = "%sGarage %s is %s.\n" % (message, garage.upper(), garage_state_names[garage_states[i]])
             else:
-                message = "You don't have access to control or look at the garage doors"
+                message = "You don't have access to control or look at the garage doors."
         elif signal in joke_signal:
             message = ""
         else:
-            message = "Something went wrong\nif you believe you got it right but aren't sure of the category respond with 'sum' to get a report with the categories.\nIf you would like general instructions type 'manual'"
+            message = "Something went wrong\nif you believe you got it right but aren't sure of the category respond with 'sum' to get a report with the categories.\nIf you would like general instructions type 'manual'."
     else:
-        message = 'Access denied'
+        message = 'Access denied.'
     message = love_note + message + dad_joke
     text_send(body=message, to=number)
     return str(message)
